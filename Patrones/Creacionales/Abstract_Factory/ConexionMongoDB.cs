@@ -1,4 +1,6 @@
 ﻿using System;
+using Newtonsoft.Json;
+using pPatronesDiseñoHotel.Patrones.Creacionales.Builder;
 
 namespace pPatronesDiseñoHotel.Patrones.Creacionales.Abstract_Factory
 {
@@ -26,18 +28,37 @@ namespace pPatronesDiseñoHotel.Patrones.Creacionales.Abstract_Factory
             Console.WriteLine("Buscando documentos en colecciones...");
             Console.ResetColor();
 
-            // Retorna una respuesta simulada en formato JSON de base de datos documental
-            return "[{\"_id\": \"64fca12e8b3a4c2198000001\", \"Status\": \"Conexión activa a colecciones MongoDB\"}]";
+            // =========================================================================
+            // LECTURA DINÁMICA DE MEMORIA:
+            // Evaluamos si la lista compartida de reservas no tiene elementos creados
+            // =========================================================================
+            if (MemoriaHotel.ListaReservas.Count == 0)
+            {
+                return "[\n  {\n    \"Mensaje\": \"No hay documentos de reservas en la colección de MongoDB aún.\"\n  }\n]";
+            }
+
+         
+            return JsonConvert.SerializeObject(MemoriaHotel.ListaReservas, Formatting.Indented);
         }
 
         public string Actualizar()
         {
-            return "Éxito: Documento actualizado en la colección de MongoDB.";
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\n[Fábrica Concreta - MongoDB NoSQL Document Engine]");
+            Console.WriteLine($"Ejecutando Comando de Actualización (UpdateOne): {SQL}");
+            Console.ResetColor();
+
+            return "Éxito: Documento actualizado en la colección de MongoDB de manera polimórfica.";
         }
 
         public string Eliminar()
         {
-            return "Éxito: Documento removido de la colección de MongoDB.";
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\n[Fábrica Concreta - MongoDB NoSQL Document Engine]");
+            Console.WriteLine($"Ejecutando Comando de Eliminación (DeleteOne): {SQL}");
+            Console.ResetColor();
+
+            return "Éxito: Documento removido de la colección de MongoDB de manera polimórfica.";
         }
     }
 }

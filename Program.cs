@@ -1,155 +1,236 @@
-﻿using System;
-using pPatronesDiseñoHotel.Patrones.Clases;
+﻿// Asegúrate de que el namespace coincida con tu carpeta de patrones
 using pPatronesDiseñoHotel.Patrones.Creacionales.Abstract_Factory;
 using pPatronesDiseñoHotel.Patrones.Creacionales.Builder;
-using pPatronesDiseñoHotel.Patrones.Estructurales.Adapter;
-using pPatronesDiseñoHotel.Patrones.Comportamiento.Observer;
+using System;
 
-// ====================================================
-// FLUJO PRINCIPAL DE LA CONSOLA (.NET 8.0)
-// ====================================================
-int opcion = 0;
-do
+namespace pPatronesDiseñoHotel
 {
-    Console.Clear();
-    Console.WriteLine("====================================================");
-    Console.WriteLine("     SISTEMA DE GESTIÓN DE HOTEL (CON PATRONES)     ");
-    Console.WriteLine("====================================================");
-    // Muestra dinámicamente cuál base de datos está seleccionada globalmente
-    Console.WriteLine($"[BD ACTIVA ACTUALMENTE: {Configuracion.baseDatos}]\n");
-
-    Console.WriteLine("1. Configurar / Cambiar Base de Datos Activa (Abstract Factory)");
-    Console.WriteLine("2. Crear Nueva Reserva de Habitación (Builder)");
-    Console.WriteLine("3. Registrar Pago de Reserva con Pasarela Externa (Adapter)");
-    Console.WriteLine("4. Cambiar Estado de Habitación y Notificar (Observer)");
-    Console.WriteLine("5. Salir");
-    Console.WriteLine("====================================================");
-    Console.Write("Seleccione una opción: ");
-
-    if (int.TryParse(Console.ReadLine(), out opcion))
+    class Program
     {
-        switch (opcion)
+        static void Main(string[] args)
         {
-            case 1:
-                ConfigurarBaseDatos();
-                break;
-            case 2:
-                CrearReservaConBuilder();
-                break;
-            case 3:
-                ProcesarPagoConAdapter();
-                break;
-            case 4:
-                SimularCambioEstadoObserver();
-                break;
-            case 5:
-                Console.WriteLine("\nSaliendo del programa... ¡Muchos éxitos en la sustentación!");
-                break;
-            default:
-                Console.WriteLine("\nOpción no válida. Presione ENTER para reintentar.");
-                Console.ReadLine();
-                break;
+            // =========================================================================
+            //  Declarar la fábrica abstracta global del sistema.
+            // Por defecto, inicializamos el hotel apuntando a SQL Server.
+            // =========================================================================
+            IAbstractFactoryBD fabricaActiva = new SqlServerFactory();
+
+            // Variable para almacenar temporalmente el motor de base de datos construido
+            IAbstractFactoryBaseDatos motorBD;
+
+            bool salir = false;
+
+            while (!salir)
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("==================================================");
+                Console.WriteLine("       SISTEMA DE GESTIÓN HOTELERA VANTIX         ");
+                Console.WriteLine("==================================================");
+                Console.WriteLine("1. Configurar / Cambiar Motor de Base de Datos");
+                Console.WriteLine("2. Registrar Nueva Reserva (Insertar)");
+                Console.WriteLine("3. Consultar Estado de Ocupación (Consultar)");
+                Console.WriteLine("4. Actualizar Datos de Habitación (Actualizar)");
+                Console.WriteLine("5. Cancelar Reserva del Hotel (Eliminar)");
+                Console.WriteLine("6. Salir del Sistema");
+                Console.WriteLine("==================================================");
+                Console.Write("Seleccione una opción: ");
+
+                string opcion = Console.ReadLine();
+
+                switch (opcion)
+                {
+                    case "1":
+                        Console.Clear();
+                        Console.WriteLine("--- CONFIGURACIÓN GLOBAL DE PERSISTENCIA ---");
+                        Console.WriteLine("1. Activar Microsoft SQL Server");
+                        Console.WriteLine("2. Activar MongoDB Cloud Cluster");
+                        Console.WriteLine("3. Activar SQLite Local Embedded");
+                        Console.Write("Seleccione el motor: ");
+                        string motorSeleccionado = Console.ReadLine();
+
+                        // =========================================================================
+                        // ARCHITECTURAL STEP 2: El Polimorfismo entra en acción.
+                        // Reemplazamos el antiguo 'switch' interno que hacía 'new' de las conexiones.
+                        // Ahora asignamos directamente la clase Fábrica Concreta correspondiente.
+                        // =========================================================================
+                        if (motorSeleccionado == "1")
+                        {
+                            fabricaActiva = new SqlServerFactory();
+                            Console.WriteLine("\n[CONFIG]: Fábrica cambiada exitosamente a SQLServerFactory.");
+                        }
+                        else if (motorSeleccionado == "2")
+                        {
+                            fabricaActiva = new MongoDbFactory();
+                            Console.WriteLine("\n[CONFIG]: Fábrica cambiada exitosamente a MongoDbFactory.");
+                        }
+                        else if (motorSeleccionado == "3")
+                        {
+                            fabricaActiva = new SqliteFactory();
+                            Console.WriteLine("\n[CONFIG]: Fábrica cambiada exitosamente a SqliteFactory.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("\nOpción inválida. Se mantiene la fábrica anterior.");
+                        }
+
+                        Console.WriteLine("\nPresione cualquier tecla para continuar...");
+                        Console.ReadKey();
+                        break;
+
+                    case "2":
+                        Console.Clear();
+                        Console.WriteLine("--- REGISTRAR NUEVA RESERVA (BUILDER + ABSTRACT FACTORY) ---");
+
+                        // 1. Solicitamos los datos dinámicos al usuario por consola
+                        Console.Write("Ingrese el nombre del cliente: ");
+                        string nombreCliente = Console.ReadLine();
+
+                        Console.Write("Ingrese el tipo de habitación (Ej: Suite, Estándar, Doble): ");
+                        string tipoHab = Console.ReadLine();
+
+                        Console.Write("Ingrese la cantidad de días de estadía: ");
+                        int cantDias = 1;
+                        int.TryParse(Console.ReadLine(), out cantDias);
+
+                        Console.Write("¿Incluye servicios extras/mascota? (S/N): ");
+                        string respuestaExtra = Console.ReadLine().ToUpper();
+                        bool incluyeExtras = (respuestaExtra == "S" || respuestaExtra == "SI");
+
+                        // 2. Instanciamos el constructor concreto (Builder)
+                        IReservaBuilder miBuilder = new ReservaHotelBuilder();
+
+                        // 3. Instanciamos el Director de reservas
+                        DirectorReservas director = new DirectorReservas();
+
+                        Console.WriteLine("\n[Procesando]... El Director está orquestando la construcción con el Builder.");
+
+                        // =========================================================================
+                        // PASO CLAVE: Llamamos al director pasando los datos capturados 
+                        // y le inyectamos la 'fabricaActiva' global para la persistencia pura.
+                        // =========================================================================
+                        string resultadoInsertar = director.GuardarReservaEnBD(miBuilder, nombreCliente, tipoHab, cantDias, incluyeExtras, fabricaActiva);
+
+                        Console.WriteLine("\n[Respuesta del Motor de Persistencia]:");
+                        Console.WriteLine(resultadoInsertar);
+
+                        Console.WriteLine("\nPresione cualquier tecla para regresar al menú...");
+                        Console.ReadKey();
+                        break;
+
+                    case "3":
+                        Console.Clear();
+                        Console.WriteLine("--- CONSULTAR RESERVAS ACTIVAS (ABSTRACT FACTORY) ---");
+                        Console.WriteLine("Enviando petición de lectura de forma agnóstica a través del Broker...\n");
+
+                        // 1. Instanciamos el broker encargado de la comunicación externa
+                        pPatronesDiseñoHotel.Patrones.Clases.brokerHotel brokerConsulta = new pPatronesDiseñoHotel.Patrones.Clases.brokerHotel();
+
+                        // 2. Definimos la consulta base según la especificación del patrón
+                        if (fabricaActiva is MongoDbFactory)
+                        {
+                            brokerConsulta.SQL = "{ db.reservas.find({ estado: 'Activo' }) }";
+                        }
+                        else
+                        {
+                            brokerConsulta.SQL = "SELECT IdReserva, Cliente, TipoHabitacion, Total FROM TBL_RESERVAS;";
+                        }
+
+                        // =========================================================================
+                        // PASO ARQUITECTÓNICO: Inyectamos la fábrica activa por parámetro al método Consultar
+                        // =========================================================================
+                        string resultadoConsultar = brokerConsulta.Consultar(fabricaActiva);
+
+                        Console.WriteLine("==================================================");
+                        Console.WriteLine("[DATOS RECUPERADOS DEL MOTOR DE PERSISTENCIA]:");
+                        Console.WriteLine("==================================================");
+                        Console.WriteLine(resultadoConsultar);
+                        Console.WriteLine("==================================================");
+
+                        Console.WriteLine("\nPresione cualquier tecla para regresar al menú...");
+                        Console.ReadKey();
+                        break;
+
+                    case "4":
+                        Console.Clear();
+                        Console.WriteLine("--- ACTUALIZAR REGISTRO DE RESERVA (ABSTRACT FACTORY) ---");
+
+                        // 1. Solicitamos los datos dinámicos al usuario
+                        Console.Write("Ingrese el ID de la reserva a modificar (Ej: RES-550E): ");
+                        string idReservaModificar = Console.ReadLine();
+
+                        Console.WriteLine("\nEstados sugeridos: [CheckIn], [CheckOut], [Cancelado]");
+                        Console.Write("Ingrese el nuevo estado para la reserva: ");
+                        string nuevoEstado = Console.ReadLine();
+
+                        // 2. Instanciamos el Director para procesar la regla de negocio y la persistencia
+                        DirectorReservas directorActualizar = new DirectorReservas();
+
+                        Console.WriteLine("\n[Procesando]... Enviando comando de actualización de forma polimórfica.");
+
+                        // =========================================================================
+                        // CAMBIO CLAVE: El director se encarga de cambiar la memoria y llamar al Broker
+                        // =========================================================================
+                        string resultadoActualizar = directorActualizar.ActualizarEstadoEnBD(idReservaModificar, nuevoEstado, fabricaActiva);
+
+                        Console.WriteLine("\n[Respuesta del Motor de Persistencia]:");
+                        Console.WriteLine(resultadoActualizar);
+
+                        Console.WriteLine("\nPresione cualquier tecla para regresar al menú...");
+                        Console.ReadKey();
+                        break;
+
+                    case "5":
+                        Console.Clear();
+                        Console.WriteLine("--- ELIMINAR / CANCELAR RESERVA (ABSTRACT FACTORY) ---");
+
+                        // 1. Solicitamos el ID de forma dinámica al usuario
+                        Console.Write("Ingrese el ID de la reserva que desea cancelar: ");
+                        string idReservaEliminar = Console.ReadLine();
+
+                        // 2. Instanciamos el broker encargado de la persistencia
+                        pPatronesDiseñoHotel.Patrones.Clases.brokerHotel brokerEliminar = new pPatronesDiseñoHotel.Patrones.Clases.brokerHotel();
+
+                        // 3. Formateamos el comando según la base de datos que esté activa
+                        if (fabricaActiva is MongoDbFactory)
+                        {
+                            // Formato Documental NoSQL para MongoDB
+                            brokerEliminar.SQL = $"{{\"db.reservas.deleteOne\": {{\"id\": \"{idReservaEliminar}\"}}}}";
+                        }
+                        else
+                        {
+                            // Formato Relacional Estándar para SQL Server o SQLite
+                            brokerEliminar.SQL = $"DELETE FROM TBL_RESERVAS WHERE IdReserva = '{idReservaEliminar}';";
+                        }
+
+                        Console.WriteLine("\n[Procesando]... Enviando comando de eliminación a través del Broker.");
+
+                        // =========================================================================
+                        // PASO ARQUITECTÓNICO:
+                        // Usamos el método del broker inyectándole la fábrica activa. Como las operaciones 
+                        // "No-Query" (Updates/Deletes) no retornan tablas, puedes canalizarlas 
+                        // a través de Insertar(fabricaActiva) de manera segura y polimórfica.
+                        // =========================================================================
+                        string resultadoEliminar = brokerEliminar.Insertar(fabricaActiva);
+
+                        Console.WriteLine("\n[Respuesta del Motor de Persistencia]:");
+                        Console.WriteLine(resultadoEliminar);
+
+                        Console.WriteLine("\nPresione cualquier tecla para regresar al menú...");
+                        Console.ReadKey();
+                        break;
+
+                    case "6":
+                        salir = true;
+                        Console.WriteLine("\nCerrando el sistema del hotel de forma segura. ¡Hasta luego!");
+                        break;
+
+                    default:
+                        Console.WriteLine("\nOpción no válida. Intente de nuevo.");
+                        System.Threading.Thread.Sleep(1500);
+                        break;
+                }
+            }
         }
     }
-} while (opcion != 5);
-
-
-// ====================================================
-// MÉTODOS DE SOPORTE PARA CADA OPCIÓN DEL MENÚ
-// ====================================================
-
-void ConfigurarBaseDatos()
-{
-    Console.Clear();
-    Console.WriteLine("--- SELECCIÓN DE BASE DE DATOS (Abstract Factory) ---");
-    Console.WriteLine("1. SQL Server");
-    Console.WriteLine("2. MongoDB");
-    Console.WriteLine("3. SQLite");
-    Console.Write("\nSeleccione el motor de persistencia: ");
-    string sel = Console.ReadLine();
-
-    if (sel == "1") Configuracion.baseDatos = eBaseDatos.SQLServer;
-    else if (sel == "2") Configuracion.baseDatos = eBaseDatos.MongoDB;
-    else if (sel == "3") Configuracion.baseDatos = eBaseDatos.SQLite;
-
-    Console.WriteLine($"\n¡Base de datos cambiada con éxito a: {Configuracion.baseDatos}!");
-    Console.WriteLine("\nPresione ENTER para volver al menú...");
-    Console.ReadLine();
-}
-
-void CrearReservaConBuilder()
-{
-    Console.Clear();
-    Console.WriteLine("--- CREACIÓN DE RESERVA (Patrón Builder) ---");
-    Console.Write("Nombre del Cliente: ");
-    string cliente = Console.ReadLine();
-
-    Console.Write("Tipo de Habitación (Suite / Estandar): ");
-    string tipo = Console.ReadLine();
-
-    Console.Write("Cantidad de días de estadía: ");
-    int.TryParse(Console.ReadLine(), out int dias);
-    if (dias <= 0) dias = 1;
-
-    Console.Write("¿Incluye Desayuno Buffet? (S/N): ");
-    bool desayuno = Console.ReadLine().ToUpper() == "S";
-
-    // Invocar al Director del Builder
-    DirectorReservas director = new DirectorReservas();
-    IReservaBuilder builder = new ReservaHotelBuilder();
-
-    Console.WriteLine("\n[Builder] Construyendo objeto complejo Reserva paso a paso...");
-
-    // Lógica interna que guarda usando el Broker y la fábrica abstracta
-    string resultado = director.GuardarReservaEnBD(builder, cliente, tipo, dias, desayuno);
-
-    Console.WriteLine($"\nResultado: {resultado}");
-    Console.WriteLine("\nPresione ENTER para volver al menú...");
-    Console.ReadLine();
-}
-
-void ProcesarPagoConAdapter()
-{
-    Console.Clear();
-    Console.WriteLine("--- PROCESAMIENTO DE PAGO (Patrón Adapter) ---");
-    Console.Write("Ingrese el ID de la reserva a pagar: ");
-    string idReserva = Console.ReadLine();
-    Console.Write("Monto a pagar: $");
-
-    // SOLUCIÓN AL ERROR CS1615 y ReadOnlySpan: Usamos tryParse correctamente para doubles
-    double.TryParse(Console.ReadLine(), out double monto);
-
-    // Instanciamos el adaptador
-    ITargetProcesadorPago pasarela = new PagoAdapter();
-
-    Console.WriteLine("\n[Adapter] Adaptando respuesta en inglés del SDK externo a logs del sistema...");
-    string resultadoBD = pasarela.RegistrarPagoHotel(monto, idReserva);
-
-    Console.WriteLine($"\n{resultadoBD}");
-    Console.WriteLine("\nPresione ENTER para volver al menú...");
-    Console.ReadLine();
-}
-
-void SimularCambioEstadoObserver()
-{
-    Console.Clear();
-    Console.WriteLine("--- CAMBIO ESTADO DE HABITACIÓN (Patrón Observer) ---");
-    Console.Write("Número de habitación: ");
-    string num = Console.ReadLine();
-    Console.WriteLine("\nSeleccione nuevo estado:\n1. Ocupada\n2. En Limpieza\n3. Mantenimiento");
-    Console.Write("Opción: ");
-    string estSel = Console.ReadLine();
-    string nuevoEstado = estSel == "1" ? "Ocupada" : estSel == "2" ? "En Limpieza" : "Mantenimiento";
-
-    // Configurar Sujeto y Observador
-    ControlHabitaciones control = new ControlHabitaciones();
-    AuditorBDObserver auditorBD = new AuditorBDObserver();
-
-    // Adjuntar el observador encargado de auditar en la BD activa
-    control.Adjuntar(auditorBD);
-
-    control.CambiarEstadoHabitacion(num, nuevoEstado);
-
-    Console.WriteLine("\nPresione ENTER para volver al menú...");
-    Console.ReadLine();
 }

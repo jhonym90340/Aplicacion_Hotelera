@@ -1,5 +1,9 @@
 ﻿using System;
 
+using System;
+using Newtonsoft.Json;
+using pPatronesDiseñoHotel.Patrones.Creacionales.Builder;
+
 namespace pPatronesDiseñoHotel.Patrones.Creacionales.Abstract_Factory
 {
     public class ConexionSQLite : IAbstractFactoryBaseDatos
@@ -25,18 +29,41 @@ namespace pPatronesDiseñoHotel.Patrones.Creacionales.Abstract_Factory
             Console.WriteLine($"Ejecutando Consulta en Archivo Local: {SQL}");
             Console.ResetColor();
 
-            // Retorna un formato JSON simulado tal como lo espera el broker
-            return "[{\"Mensaje\": \"Datos de auditoría cargados desde SQLite con éxito\"}]";
+            // =========================================================================
+            // LECTURA DINÁMICA DE MEMORIA:
+            // Evaluamos si la lista compartida de reservas no tiene elementos creados
+            // =========================================================================
+            if (MemoriaHotel.ListaReservas.Count == 0)
+            {
+                return "[\n  {\n    \"Mensaje\": \"No hay reservas registradas en la memoria de SQLite aún.\"\n  }\n]";
+            }
+
+            // =========================================================================
+          
+            // Convierte de forma automática la lista completa de reservas acumuladas
+            // a formato JSON estructurado con sangrías elegantes.
+            // =========================================================================
+            return JsonConvert.SerializeObject(MemoriaHotel.ListaReservas, Formatting.Indented);
         }
 
         public string Actualizar()
         {
-            return "Éxito: Registro modificado en archivo SQLite.";
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("\n[Fábrica Concreta - SQLite Embedded Engine]");
+            Console.WriteLine($"Ejecutando Sentencia de Actualización: {SQL}");
+            Console.ResetColor();
+
+            return "Éxito: Registro modificado en archivo SQLite de manera polimórfica.";
         }
 
         public string Eliminar()
         {
-            return "Éxito: Registro removido de archivo SQLite.";
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("\n[Fábrica Concreta - SQLite Embedded Engine]");
+            Console.WriteLine($"Ejecutando Sentencia de Eliminación: {SQL}");
+            Console.ResetColor();
+
+            return "Éxito: Registro removido de archivo SQLite de manera polimórfica.";
         }
     }
 }

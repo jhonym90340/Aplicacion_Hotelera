@@ -46,7 +46,7 @@ namespace pPatronesDiseñoHotel.Patrones.Comportamiento.Observer
                 broker.SQL = $"INSERT INTO HistorialHabitaciones (Habitacion, Estado, FechaLog) VALUES ('{habitacion}', '{nuevoEstado}', '{DateTime.Now:yyyy-MM-dd HH:mm:ss}')";
             }
 
-            broker.Insertar();
+            broker.Insertar(new pPatronesDiseñoHotel.Patrones.Creacionales.Abstract_Factory.SqlServerFactory());
         }
     }
 }

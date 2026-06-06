@@ -1,4 +1,6 @@
 ﻿using System;
+using Newtonsoft.Json;
+using pPatronesDiseñoHotel.Patrones.Creacionales.Builder;
 
 namespace pPatronesDiseñoHotel.Patrones.Creacionales.Abstract_Factory
 {
@@ -25,18 +27,41 @@ namespace pPatronesDiseñoHotel.Patrones.Creacionales.Abstract_Factory
             Console.WriteLine($"Ejecutando Consulta: {SQL}");
             Console.ResetColor();
 
-            // Retorna un formato JSON simulado tal como lo espera el broker
-            return "[{\"Mensaje\": \"Datos de reservas cargados desde SQL Server con éxito\"}]";
+            // =========================================================================
+            // LECTURA DINÁMICA DE MEMORIA:
+            // Evaluamos si la lista compartida de reservas no tiene elementos creados
+            // =========================================================================
+            if (MemoriaHotel.ListaReservas.Count == 0)
+            {
+                return "[\n  {\n    \"Mensaje\": \"No hay reservas registradas en las tablas de SQL Server aún.\"\n  }\n]";
+            }
+
+            // =========================================================================
+       
+            // Convierte de forma automática la lista completa de reservas acumuladas
+            // a formato JSON estructurado con sangrías elegantes.
+            // =========================================================================
+            return JsonConvert.SerializeObject(MemoriaHotel.ListaReservas, Formatting.Indented);
         }
 
         public string Actualizar()
         {
-            return "Éxito: Registro actualizado en SQL Server.";
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n[Fábrica Concreta - SQL Server Engine]");
+            Console.WriteLine($"Ejecutando Sentencia de Actualización: {SQL}");
+            Console.ResetColor();
+
+            return "Éxito: Registro actualizado en SQL Server de manera polimórfica.";
         }
 
         public string Eliminar()
         {
-            return "Éxito: Registro eliminado de SQL Server.";
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n[Fábrica Concreta - SQL Server Engine]");
+            Console.WriteLine($"Ejecutando Sentencia de Eliminación: {SQL}");
+            Console.ResetColor();
+
+            return "Éxito: Registro eliminado de SQL Server de manera polimórfica.";
         }
     }
 }

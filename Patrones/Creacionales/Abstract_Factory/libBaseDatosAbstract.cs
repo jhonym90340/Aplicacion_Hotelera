@@ -2,14 +2,13 @@
 
 namespace pPatronesDiseñoHotel.Patrones.Creacionales.Abstract_Factory
 {
-    // Interfaz para la fábrica abstracta de bases de datos
+    //  El Contrato de la Fábrica Abstracta: Cada fábrica se encargará de crear su propio motor independiente
     public interface IAbstractFactoryBD
     {
-        eBaseDatos baseDatos { get; set; }
-        IAbstractFactoryBaseDatos CrearBaseDatos();
+        IAbstractFactoryBaseDatos CrearMotor();
     }
 
-    // Interfaz para los productos (los motores de bases de datos)
+    //  El Contrato del Producto
     public interface IAbstractFactoryBaseDatos
     {
         string SQL { get; set; }
@@ -19,32 +18,11 @@ namespace pPatronesDiseñoHotel.Patrones.Creacionales.Abstract_Factory
         string Consultar();
     }
 
-    // Enumerador con los motores seleccionados para el proyecto del hotel
+    // Enumerador para mantener compatibilidad con tus selecciones en los menús
     public enum eBaseDatos
     {
         SQLServer = 1,
         MongoDB = 2,
         SQLite = 3
-    }
-
-    // Fábrica concreta que instancia las conexiones según la configuración global
-    public class BaseDatosFactory : IAbstractFactoryBD
-    {
-        public eBaseDatos baseDatos { get; set; }
-
-        public IAbstractFactoryBaseDatos? CrearBaseDatos()
-        {
-            switch (baseDatos)
-            {
-                case eBaseDatos.SQLServer:
-                    return new ConexionSQL();
-                case eBaseDatos.MongoDB:
-                    return new ConexionMongoDB();
-                case eBaseDatos.SQLite:
-                    return new ConexionSQLite();
-                default:
-                    return null;
-            }
-        }
     }
 }
