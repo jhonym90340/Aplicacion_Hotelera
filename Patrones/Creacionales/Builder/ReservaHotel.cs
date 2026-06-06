@@ -18,9 +18,7 @@ namespace pPatronesDiseñoHotel.Patrones.Creacionales.Builder
         public string Estado { get; set; } = "Activo"; // Por defecto nace Activa
     }
 
-    // =========================================================================
-    // CONTRATO CORREGIDO: Coincide exactamente con lo que el Director necesita
-    // =========================================================================
+    
     public interface IReservaBuilder
     {
         void DefinirCliente(string nombre);
@@ -78,7 +76,7 @@ namespace pPatronesDiseñoHotel.Patrones.Creacionales.Builder
             Reserva nuevaReserva = builder.ObtenReserva();
 
             // =========================================================================
-            //  NUEVO PASO: PERSISTENCIA EN MEMORIA DINÁMICA
+            //   PERSISTENCIA EN MEMORIA DINÁMICA
             // Guardamos el objeto real en nuestra lista estática global antes de que el 
             // método termine. Esto permite que la Opción 3 acumule múltiples registros.
             // =========================================================================
@@ -110,7 +108,7 @@ namespace pPatronesDiseñoHotel.Patrones.Creacionales.Builder
 
 
         // =========================================================================
-        // NUEVO MÉTODO DEL DIRECTOR: Actualiza el estado real en la lista de memoria
+       // Actualiza el estado real en la lista de memoria
         // =========================================================================
         public string ActualizarEstadoEnBD(string idReserva, string nuevoEstado, IAbstractFactoryBD fabricaActiva)
         {
