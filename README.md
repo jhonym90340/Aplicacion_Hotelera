@@ -45,7 +45,7 @@ El núcleo del software gira en torno a la simulación interactiva de operacione
 
 ### 2. Builder (Creacional - Adicional)
 * **Ubicación:** `Patrones/Creacionales/Builder/`
-* **Propósito:** Controla la construcción paso a paso del objeto complejo `ReservaHotel` (Cliente ➡️ Habitación ➡️ Días ➡️ Extras como desayuno buffet). Se ejecuta en la **Opción 2** del menú.
+* **Propósito:** Controla la construcción paso a paso del objeto complejo `ReservaHotel` (Cliente  Habitación  Días  Extras como desayuno buffet). Se ejecuta en la **Opción 2** del menú.
 
 ### 3. Adapter (Estructural - Adicional)
 * **Ubicación:** `Patrones/Estructurales/Adapter/`
